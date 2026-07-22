@@ -74,6 +74,7 @@ public class ControladorLogin implements ActionListener {
                 ctrlPrincipal.iniciar();
                 
             } else {
+                JOptionPane.showMessageDialog(vista, "Usuario o clave incorrectos", "Error", JOptionPane.ERROR_MESSAGE);
                  
 
             }
