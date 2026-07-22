@@ -16,57 +16,54 @@ public class ControladorPrincipal implements ActionListener {
     public ControladorPrincipal(FrmPrincipal vistaPrincipal) {
         this.vistaPrincipal = vistaPrincipal;
         
-        // Ponemos a la escucha el submenú de materiales
+        // Suscripción de eventos para los ítems del menú principal
         this.vistaPrincipal.menuMateriales.addActionListener(this);
-        
-        // Ponemos a la escucha el submenú de movimientos
         this.vistaPrincipal.menuMovimientos.addActionListener(this);
-        
-        // Escuchamos el botón Salir <---
         this.vistaPrincipal.menuSalir.addActionListener(this);
     }
 
     public void iniciar() {
-        // En el título, mostramos quién está conectado
+        // Modificación dinámica del título integrando los datos de la sesión activa
         vistaPrincipal.setTitle("Sistema de Almacén - Usuario: " + utilidades.Sesion.usuarioLogueado.getUsername());
         vistaPrincipal.setExtendedState(JFrame.MAXIMIZED_BOTH); 
         
         // ====================================================
-        // MAGIA DE SEGURIDAD: CONTROL DE ACCESO POR ROLES
+        // IMPLEMENTACIÓN DE SEGURIDAD: CONTROL DE ACCESO BASADO EN ROLES (RBAC)
         // ====================================================
         String rolUsuario = utilidades.Sesion.usuarioLogueado.getRol();
         
-        // Si es Almacenero, ocultamos el menú de movimientos por completo
+        // Restricción de visibilidad de módulos operativos según el rol del usuario autenticado
         if (rolUsuario.equals("Almacenero")) {
             vistaPrincipal.menuMovimientosBarra.setVisible(false);
         }
-        // Si es Administrador o Supervisor, el menú seguirá visible por defecto.
+        // Para perfiles 'Administrador' o 'Supervisor', el menú mantiene visibilidad completa
         
         vistaPrincipal.setVisible(true);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        // Si hacen clic en el menú "Gestión de Materiales"
+        // Despliegue del submódulo: Gestión de Inventario
         if (e.getSource() == vistaPrincipal.menuMateriales) {
             
-            // 1. Instanciamos la ventana interna y su DAO
+            // 1. Instanciación de componentes internos
             JIfrmMateriales vistaMateriales = new JIfrmMateriales();
             MaterialDAO daoMateriales = new MaterialDAO();
 
-            // 2. CONECTAMOS TODO: Instanciamos tu nuevo ControladorInventario
+            // 2. Aplicación del patrón MVC: Inyección de la vista y modelo al controlador
             ControladorInventario ctrlMat = new ControladorInventario(vistaMateriales, daoMateriales);
 
-            // 3. Agregamos la ventanita al escritorio MDI y la mostramos
+            // 3. Renderizado del InternalFrame dentro del contenedor MDI
             vistaPrincipal.escritorio.add(vistaMateriales);
             vistaMateriales.setVisible(true);
         }
-        // Si hacen clic en el menú "Salir"
+        
+        // Ejecución de flujo de Cierre de Sesión
         if (e.getSource() == vistaPrincipal.menuSalir) {
-            // ---> AGREGA ESTO PARA DEPURAR <---
-            System.out.println("¡Se hizo clic en Cerrar Sesión!");
+            // Trazabilidad interna de consola para auditoría de acciones del usuario
+            System.out.println("Cierre de Sesión interceptado");
             
-            // Preguntamos al usuario si está seguro
+            // Validación de intencionalidad de salida
             int confirmacion = javax.swing.JOptionPane.showConfirmDialog(
                     vistaPrincipal, 
                     "¿Está seguro que desea cerrar sesión y salir del sistema?", 
@@ -75,36 +72,34 @@ public class ControladorPrincipal implements ActionListener {
                     javax.swing.JOptionPane.QUESTION_MESSAGE
             );
             
-            // Si elige "Sí"
             if (confirmacion == javax.swing.JOptionPane.YES_OPTION) {
-                // 1. Limpiamos la sesión global por seguridad
+                // 1. Destrucción de la sesión global activa por seguridad
                 utilidades.Sesion.usuarioLogueado = null;
                 
-                // 2. Cerramos el escritorio principal
+                // 2. Liberación de memoria gráfica del contenedor principal
                 vistaPrincipal.dispose();
                 
-                // 3. Volvemos a abrir la pantalla de Login (para que otro usuario pueda entrar)
+                // 3. Reinicio del ciclo de vida del software llamando al Login nuevamente
                 vista.FrmLogin vistaLogin = new vista.FrmLogin();
                 dao.UsuarioDAO daoUsuario = new dao.UsuarioDAO();
                 controlador.ControladorLogin ctrlLogin = new controlador.ControladorLogin(vistaLogin, daoUsuario);
                 ctrlLogin.iniciar();
                 
-                // Nota: Si en lugar de volver al login prefieres que el programa se cierre 
-                // por completo, puedes borrar los pasos 1, 2 y 3 y simplemente escribir: 
-                // System.exit(0);
+                // Nota arquitectónica: Si se requiriera terminar la ejecución del proceso por completo 
+                // se podría implementar una llamada a System.exit(0);
             }
         }
         
-        // Si hacen clic en el menú "Historial de Movimientos"
+        // Despliegue del submódulo: Historial Transaccional
         if (e.getSource() == vistaPrincipal.menuMovimientos) {
 
             JIfrmMovimientos vistaMov = new JIfrmMovimientos();
             MovimientoDAO daoMov = new MovimientoDAO();
 
-            // Instanciamos el controlador que acabamos de crear
+            // Despliegue modular del controlador de auditoría
             ControladorMovimientos ctrlMov = new ControladorMovimientos(vistaMov, daoMov);
 
-            // Lo agregamos al escritorio
+            // Renderizado en el MDI central
             vistaPrincipal.escritorio.add(vistaMov);
             vistaMov.setVisible(true);
         }

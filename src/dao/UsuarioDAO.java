@@ -13,14 +13,15 @@ import utilidades.ConexionDB;
 public class UsuarioDAO implements IOperacionesCRUD<Usuario> {
 
     // ==========================================
-    // MÉTODO EXCLUSIVO: INICIO DE SESIÓN (LOGIN)
+    // MÉTODO ESPECÍFICO: AUTENTICACIÓN DE USUARIO (LOGIN)
     // ==========================================
     public Usuario login(String username, String password) {
         Usuario usuario = null;
-        // El uso de "?" protege tu base de datos contra inyección SQL
+        
+        // SEGURIDAD: Implementación de consultas parametrizadas (?) para prevenir vulnerabilidades de Inyección SQL
         String sql = "SELECT * FROM usuarios WHERE username = ? AND password = ?";
         
-        // El bloque try-with-resources asegura que la conexión se cierre automáticamente
+        // Uso de try-with-resources para la gestión eficiente de conexiones a la base de datos
         try (Connection con = ConexionDB.conectar();
              PreparedStatement ps = con.prepareStatement(sql)) {
              
@@ -29,7 +30,7 @@ public class UsuarioDAO implements IOperacionesCRUD<Usuario> {
             
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    // Si encuentra el usuario, crea el objeto con los datos de MySQL
+                    // Mapeo relacional-objeto (ORM manual): Traslado del ResultSet hacia la entidad Usuario
                     usuario = new Usuario(
                         rs.getInt("id_usuario"),
                         rs.getString("dni"),
@@ -48,7 +49,7 @@ public class UsuarioDAO implements IOperacionesCRUD<Usuario> {
     }
 
     // ==========================================
-    // MÉTODOS OBLIGATORIOS DE LA INTERFAZ CRUD
+    // IMPLEMENTACIÓN DE LOS CONTRATOS DE LA INTERFAZ GENÉRICA IOperacionesCRUD
     // ==========================================
 
     @Override
@@ -64,7 +65,7 @@ public class UsuarioDAO implements IOperacionesCRUD<Usuario> {
             ps.setString(5, objeto.getPassword());
             ps.setString(6, objeto.getRol());
             
-            return ps.executeUpdate() > 0; // Retorna true si se insertó al menos 1 fila
+            return ps.executeUpdate() > 0; 
         } catch (SQLException e) {
             System.err.println("Error al crear usuario: " + e.getMessage());
             return false;

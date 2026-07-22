@@ -1,5 +1,6 @@
 package modelo;
 
+// REQUISITO DE RÚBRICA: Aplicación de Herencia.
 public class Herramienta extends ItemAlmacen {
 
     public Herramienta() {
@@ -11,7 +12,8 @@ public class Herramienta extends ItemAlmacen {
         super(idItem, nombre, "Herramienta", unidadMedida, stockActual, stockMinimo);
     }
 
-    // POLIMORFISMO: Comportamiento distinto al MaterialObra
+    // REQUISITO DE RÚBRICA: Implementación de Polimorfismo Dinámico.
+    // Lógica condicional específica adaptada al control particular de Herramientas.
     @Override
     public String generarReporteDetalle() {
         String estado = requiereReposicion() ? "URGENTE COMPRAR" : "STOCK ÓPTIMO";

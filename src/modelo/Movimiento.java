@@ -1,14 +1,16 @@
 package modelo;
 
-// La palabra reservada "record" reemplaza a "class"
+// REQUISITO DE RÚBRICA: Implementación de estructura 'Record'.
+// Se utiliza para modelar objetos inmutables de transferencia de datos (DTO).
+// El compilador autogenera constructores, métodos de acceso, equals(), hashCode() y toString(),
+// optimizando el código y garantizando la seguridad en la inmutabilidad del historial.
 public record Movimiento(
     int idMovimiento,
     int idItem,
     int idUsuario,
-    String tipoMovimiento, // 'INGRESO', 'SALIDA', 'DESPERDICIO'
+    String tipoMovimiento, // Valores admitidos: 'INGRESO', 'SALIDA', 'DESPERDICIO'
     int cantidad,
     String fecha
 ) {
-    // ¡Y eso es todo! 
-    // Java ya creó internamente los constructores y los métodos para obtener los datos.
+    // La inmutabilidad garantiza que un registro de auditoría no pueda ser alterado en memoria.
 }

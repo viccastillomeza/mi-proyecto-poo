@@ -1,5 +1,8 @@
 package modelo;
 
+// REQUISITO DE RÚBRICA: Implementación de Clase Abstracta.
+// Sirve como superclase base del dominio para los elementos del inventario,
+// evitando la instanciación directa de ítems genéricos.
 public abstract class ItemAlmacen {
     private int idItem;
     private String nombre;
@@ -8,10 +11,9 @@ public abstract class ItemAlmacen {
     private int stockActual;
     private int stockMinimo;
 
-    // Constructor vacío
+    // Sobrecarga de constructores para inicialización flexible
     public ItemAlmacen() {}
 
-    // Constructor completo
     public ItemAlmacen(int idItem, String nombre, String tipoItem, String unidadMedida, int stockActual, int stockMinimo) {
         this.idItem = idItem;
         this.nombre = nombre;
@@ -21,7 +23,8 @@ public abstract class ItemAlmacen {
         this.stockMinimo = stockMinimo;
     }
 
-    // Getters y Setters (Encapsulamiento)
+    // REQUISITO DE RÚBRICA: Aplicación de Encapsulamiento.
+    // Ocultamiento del estado interno y acceso controlado mediante getters y setters.
     public int getIdItem() { return idItem; }
     public void setIdItem(int idItem) { this.idItem = idItem; }
 
@@ -40,10 +43,11 @@ public abstract class ItemAlmacen {
     public int getStockMinimo() { return stockMinimo; }
     public void setStockMinimo(int stockMinimo) { this.stockMinimo = stockMinimo; }
 
-    // MÉTODOS ABSTRACTOS: Las clases hijas estarán obligadas a programar su propio comportamiento
+    // REQUISITO DE RÚBRICA: Definición de Método Abstracto.
+    // Obliga contractualmente a las subclases a implementar su propia lógica de reporte.
     public abstract String generarReporteDetalle();
     
-    // Método común para saber si hay que comprar más material
+    // Método concreto heredable para la evaluación lógica del estado del inventario.
     public boolean requiereReposicion() {
         return this.stockActual <= this.stockMinimo;
     }

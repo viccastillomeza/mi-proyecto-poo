@@ -1,21 +1,28 @@
-package principal; // O el paquete donde lo pongas
+package principal;
 
 import controlador.ControladorLogin;
 import dao.UsuarioDAO;
 import vista.FrmLogin;
 
+// Clase principal que actúa como punto de entrada (Entry Point) del sistema.
 public class Main {
     public static void main(String[] args) {
-        // 1. Instanciamos el Modelo (DAO)
+        
+        // =========================================================
+        // APLICACIÓN DEL PATRÓN ARQUITECTÓNICO MVC (Modelo-Vista-Controlador)
+        // Inicialización aislada y acoplamiento de las capas del sistema
+        // =========================================================
+        
+        // 1. Instanciación de la capa de persistencia y reglas de negocio (Modelo)
         UsuarioDAO dao = new UsuarioDAO();
         
-        // 2. Instanciamos la Vista
+        // 2. Instanciación de la interfaz gráfica de usuario (Vista)
         FrmLogin vista = new FrmLogin();
         
-        // 3. Instanciamos el Controlador uniendo la Vista y el DAO
+        // 3. Inyección de dependencias: Ensamblamos el Controlador vinculando la Vista y el Modelo
         ControladorLogin controlador = new ControladorLogin(vista, dao);
         
-        // 4. ¡Arrancamos el programa!
+        // 4. Transferencia del hilo de ejecución al controlador para iniciar el ciclo de vida del software
         controlador.iniciar();
     }
 }

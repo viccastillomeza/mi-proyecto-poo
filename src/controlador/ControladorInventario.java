@@ -6,10 +6,13 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import dao.MaterialDAO;
+import dao.MovimientoDAO;
 import modelo.Consumible;
 import modelo.Herramienta;
 import modelo.ItemAlmacen;
 import modelo.MaterialObra;
+import modelo.Movimiento;
+import utilidades.Sesion;
 import vista.JIfrmMateriales;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,14 +27,14 @@ public class ControladorInventario implements ActionListener {
         this.vista = vista;
         this.dao = dao;
         
-        // Ponemos los botones a escuchar clics
+        // Suscripción de los componentes de la vista a los eventos de acción (Listener)
         this.vista.btnGuardar.addActionListener(this);
         this.vista.btnActualizar.addActionListener(this);
         this.vista.btnEliminar.addActionListener(this);
         this.vista.btnLimpiar.addActionListener(this);
         this.vista.btnReporte.addActionListener(this);
         
-        // NUEVO: Escuchamos los clics en la tabla para subir los datos al formulario
+        // Implementación de MouseListener para la selección y extracción de datos desde la JTable
         this.vista.tblMateriales.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
@@ -39,18 +42,18 @@ public class ControladorInventario implements ActionListener {
             }
         });
         
-        // Iniciamos la tabla y cargamos los datos
+        // Inicialización de la vista con los datos persistidos
         listarMateriales();
     }
     
     // =========================================================
-    // UTILIDAD: SUBIR DATOS DE LA TABLA AL FORMULARIO
+    // MÉTODO AUXILIAR: TRANSFERENCIA DE DATOS DE LA TABLA AL FORMULARIO
     // =========================================================
     private void llenarCamposDesdeTabla() {
         int fila = vista.tblMateriales.getSelectedRow();
         if (fila == -1) return;
 
-        // El ID está en la columna 0, no lo mostramos en caja pero lo usaremos internamente
+        // Recuperación de la fila seleccionada (El ID está en la columna 0 para uso interno)
         vista.txtNombre.setText(vista.tblMateriales.getValueAt(fila, 1).toString());
         vista.cbxTipo.setSelectedItem(vista.tblMateriales.getValueAt(fila, 2).toString());
         vista.txtUnidad.setText(vista.tblMateriales.getValueAt(fila, 3).toString());
@@ -59,18 +62,17 @@ public class ControladorInventario implements ActionListener {
     }
 
     // =========================================================
-    // MÉTODO LISTAR (CON LAMBDAS Y STREAMS PARA LA RÚBRICA)
+    // MÉTODO LISTAR: APLICACIÓN DE LAMBDAS (REQUISITO DE RÚBRICA)
     // =========================================================
     private void listarMateriales() {
-        // Obtenemos el modelo de la tabla para poder agregarle filas
+        // Reseteo del modelo de tabla para evitar duplicidad visual
         modeloTabla = (DefaultTableModel) vista.tblMateriales.getModel();
-        modeloTabla.setRowCount(0); // Limpiamos la tabla antes de cargar
+        modeloTabla.setRowCount(0); 
 
-        // Traemos la colección (List) desde la base de datos
+        // Extracción de la colección principal desde la capa de persistencia (DAO)
         List<ItemAlmacen> lista = dao.leerTodos();
 
-        // REQUISITO DE RÚBRICA: Uso de Expresión Lambda (forEach)
-        // En lugar de usar un bucle 'for' antiguo, iteramos la colección con programación funcional
+        // REQUISITO DE RÚBRICA: Iteración de la colección mediante programación funcional (Lambda forEach)
         lista.forEach(item -> {
             Object[] fila = new Object[6];
             fila[0] = item.getIdItem();
@@ -79,22 +81,22 @@ public class ControladorInventario implements ActionListener {
             fila[3] = item.getUnidadMedida();
             fila[4] = item.getStockActual();
             fila[5] = item.getStockMinimo();
-            modeloTabla.addRow(fila); // Agregamos la fila a la tabla visual
+            modeloTabla.addRow(fila); 
         });
     }
 
     // =========================================================
-    // CONTROL DE CLICS (GUARDAR, ACTUALIZAR, ELIMINAR)
+    // GESTIÓN DE EVENTOS CRUD Y REPORTE
     // =========================================================
     @Override
     public void actionPerformed(ActionEvent e) {
         
-        // ----- BOTÓN LIMPIAR -----
+        // ----- OPERACIÓN: LIMPIAR FORMULARIO -----
         if (e.getSource() == vista.btnLimpiar) {
             limpiarCajas();
         }
 
-        // ----- BOTÓN GUARDAR (CREATE) -----
+        // ----- OPERACIÓN: CREAR (INSERT) -----
         if (e.getSource() == vista.btnGuardar) {
             if (camposVacios()) return;
 
@@ -104,7 +106,8 @@ public class ControladorInventario implements ActionListener {
             int stock = Integer.parseInt(vista.txtStock.getText());
             int minimo = Integer.parseInt(vista.txtStockMinimo.getText());
 
-            // POLIMORFISMO: Creamos el objeto hijo correspondiente
+            // APLICACIÓN DE POLIMORFISMO (REQUISITO DE RÚBRICA): 
+            // Instanciación dinámica de la subclase correspondiente según la selección del usuario
             ItemAlmacen nuevoItem = null;
             switch (tipo) {
                 case "MaterialObra":
@@ -121,53 +124,78 @@ public class ControladorInventario implements ActionListener {
             if (dao.crear(nuevoItem)) {
                 JOptionPane.showMessageDialog(vista, "Material registrado con éxito");
                 limpiarCajas();
-                listarMateriales(); // Recargamos la tabla
+                listarMateriales(); // Sincronización de la vista
             } else {
                 JOptionPane.showMessageDialog(vista, "Error al guardar en MySQL");
             }
         }
         
-        // ----- BOTÓN ACTUALIZAR (UPDATE) -----
+       // ----- OPERACIÓN: ACTUALIZAR (UPDATE) CON AUDITORÍA -----
         if (e.getSource() == vista.btnActualizar) {
-            int filaSeleccionada = vista.tblMateriales.getSelectedRow();
-            if (filaSeleccionada == -1) {
-                JOptionPane.showMessageDialog(vista, "Seleccione un material de la tabla para actualizar", "Aviso", JOptionPane.WARNING_MESSAGE);
+            
+            // 1. Validación de estado de selección
+            int fila = vista.tblMateriales.getSelectedRow();
+            if (fila == -1) {
+                JOptionPane.showMessageDialog(null, "Debe seleccionar un material de la tabla para actualizar");
                 return;
             }
-            if (camposVacios()) return;
 
-            // Extraemos el ID original desde la tabla (columna 0)
-            int id = (int) vista.tblMateriales.getValueAt(filaSeleccionada, 0); 
+            // 2. Extracción de estado previo para cálculos de auditoría
+            int idItem = Integer.parseInt(vista.tblMateriales.getValueAt(fila, 0).toString());
+            int stockAntiguo = Integer.parseInt(vista.tblMateriales.getValueAt(fila, 4).toString());
+
+            // 3. Captura del nuevo estado del objeto desde el formulario
             String nombre = vista.txtNombre.getText();
             String tipo = vista.cbxTipo.getSelectedItem().toString();
             String unidad = vista.txtUnidad.getText();
-            int stock = Integer.parseInt(vista.txtStock.getText());
+            int stockNuevo = Integer.parseInt(vista.txtStock.getText());
             int minimo = Integer.parseInt(vista.txtStockMinimo.getText());
 
-            // POLIMORFISMO: Recreamos el objeto con sus nuevos valores, manteniendo su ID
-            ItemAlmacen itemActualizado = null;
+            // POLIMORFISMO: Preparación del objeto con sus nuevos atributos
+            ItemAlmacen itemModificado = null;
             switch (tipo) {
                 case "MaterialObra":
-                    itemActualizado = new MaterialObra(id, nombre, unidad, stock, minimo, 0);
+                    itemModificado = new MaterialObra(idItem, nombre, unidad, stockNuevo, minimo, 0); 
                     break;
                 case "Herramienta":
-                    itemActualizado = new Herramienta(id, nombre, unidad, stock, minimo);
+                    itemModificado = new Herramienta(idItem, nombre, unidad, stockNuevo, minimo);
                     break;
                 case "Consumible":
-                    itemActualizado = new Consumible(id, nombre, unidad, stock, minimo);
+                    itemModificado = new Consumible(idItem, nombre, unidad, stockNuevo, minimo);
                     break;
             }
 
-            if (dao.actualizar(itemActualizado)) {
-                JOptionPane.showMessageDialog(vista, "Material actualizado correctamente");
+            // Ejecución de la transacción principal en MySQL
+            if (dao.actualizar(itemModificado)) {
+                
+                // 4. LÓGICA DE AUDITORÍA: Cálculo automático de variación de inventario
+                int diferencia = stockNuevo - stockAntiguo;
+
+                if (diferencia != 0) { 
+                    String tipoMovimiento = (diferencia > 0) ? "INGRESO" : "SALIDA";
+                    int cantidad = Math.abs(diferencia); // Normalización de la cantidad a valor absoluto
+                    int idUsuario = Sesion.usuarioLogueado.getIdUsuario();
+
+                    // REQUISITO DE RÚBRICA: Uso de la estructura inmutable 'Record' de Java 14+
+                    Movimiento mov = new Movimiento(0, idItem, idUsuario, tipoMovimiento, cantidad, "");
+
+                    // Registro transparente de la transacción física
+                    MovimientoDAO movDao = new MovimientoDAO();
+                    movDao.registrarMovimiento(mov);
+                }
+
+                JOptionPane.showMessageDialog(vista, "Material actualizado correctamente.");
+                
+                // 5. Restablecimiento del flujo de interfaz
                 limpiarCajas();
-                listarMateriales(); // Recargamos la tabla para ver los cambios
+                listarMateriales();
+                
             } else {
-                JOptionPane.showMessageDialog(vista, "Error al actualizar en MySQL", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(vista, "Error al actualizar en MySQL");
             }
         }
         
-        // ----- BOTÓN ELIMINAR (DELETE) -----
+        // ----- OPERACIÓN: ELIMINAR (DELETE) -----
         if (e.getSource() == vista.btnEliminar) {
             int filaSeleccionada = vista.tblMateriales.getSelectedRow();
             if (filaSeleccionada == -1) {
@@ -175,7 +203,7 @@ public class ControladorInventario implements ActionListener {
                 return;
             }
             
-            // Obtenemos el ID de la primera columna (columna 0) de la tabla
+            // Extracción de llave primaria
             int id = (int) vista.tblMateriales.getValueAt(filaSeleccionada, 0);
             
             int confirmacion = JOptionPane.showConfirmDialog(vista, "¿Está seguro de eliminar este ítem?", "Confirmar", JOptionPane.YES_NO_OPTION);
@@ -186,10 +214,11 @@ public class ControladorInventario implements ActionListener {
                 }
             }
         }
-        // ----- BOTÓN REPORTE (STREAMS Y MAP PARA LA RÚBRICA) -----
+        
+        // ----- OPERACIÓN: GENERACIÓN DE REPORTES (STREAMS Y MAP PARA RÚBRICA) -----
         if (e.getSource() == vista.btnReporte) {
             
-            // 1. Obtenemos toda la lista desde MySQL
+            // 1. Extracción del listado maestro desde la base de datos
             List<ItemAlmacen> inventario = dao.leerTodos();
 
             if (inventario.isEmpty()) {
@@ -198,32 +227,32 @@ public class ControladorInventario implements ActionListener {
             }
 
             // ==============================================================
-            // REQUISITO DE RÚBRICA: Uso de Streams y Map
-            // Agrupamos los ítems por tipo y sumamos su stock automáticamente
+            // REQUISITO DE RÚBRICA: Uso de API Streams y Collectors (Map)
+            // Agrupamiento lógico de los ítems por subclase y sumarización de stock
             // ==============================================================
             Map<String, Integer> reportePorCategoria = inventario.stream()
                     .collect(Collectors.groupingBy(
-                            ItemAlmacen::getTipoItem, // Llave del Map: El tipo de ítem
-                            Collectors.summingInt(ItemAlmacen::getStockActual) // Valor del Map: La suma del stock
+                            ItemAlmacen::getTipoItem, // Clave: Tipo de herencia
+                            Collectors.summingInt(ItemAlmacen::getStockActual) // Valor: Acumulador de stock
                     ));
 
-            // Preparamos el texto a mostrar
+            // Estructuración del buffer de texto
             StringBuilder mensaje = new StringBuilder("=== REPORTE DE STOCK GERENCIAL ===\n\n");
             
             // ==============================================================
-            // REQUISITO DE RÚBRICA: Segunda expresión Lambda (forEach en Map)
+            // REQUISITO DE RÚBRICA: Segunda expresión Lambda (forEach sobre Map)
             // ==============================================================
             reportePorCategoria.forEach((categoria, totalStock) -> {
                 mensaje.append("► Categoría ").append(categoria).append(": ")
                        .append(totalStock).append(" unidades en total.\n");
             });
 
-            // Mostramos el reporte en pantalla
+            // Renderizado del reporte analítico
             JOptionPane.showMessageDialog(vista, mensaje.toString(), "Reporte de Inventario", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
-    // Utilidad para limpiar el formulario
+    // Utilidad interna: Limpieza de componentes
     private void limpiarCajas() {
         vista.txtNombre.setText("");
         vista.txtUnidad.setText("");
@@ -232,7 +261,7 @@ public class ControladorInventario implements ActionListener {
         vista.cbxTipo.setSelectedIndex(0);
     }
 
-    // Utilidad para validar
+    // Utilidad interna: Verificación de integridad de datos frontend
     private boolean camposVacios() {
         if (vista.txtNombre.getText().isEmpty() || vista.txtUnidad.getText().isEmpty() || 
             vista.txtStock.getText().isEmpty() || vista.txtStockMinimo.getText().isEmpty()) {

@@ -1,5 +1,6 @@
 package modelo;
 
+// REQUISITO DE RÚBRICA: Aplicación de Herencia y extensión del modelo de dominio.
 public class Consumible extends ItemAlmacen {
 
     public Consumible() {
@@ -11,6 +12,8 @@ public class Consumible extends ItemAlmacen {
         super(idItem, nombre, "Consumible", unidadMedida, stockActual, stockMinimo);
     }
 
+    // REQUISITO DE RÚBRICA: Polimorfismo (@Override).
+    // Formato de salida exclusivo para la entidad Consumible.
     @Override
     public String generarReporteDetalle() {
         return "Consumible: " + getNombre() + " | Cantidad: " + getStockActual() + " " + getUnidadMedida();

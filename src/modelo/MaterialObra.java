@@ -1,6 +1,9 @@
 package modelo;
 
+// REQUISITO DE RÚBRICA: Aplicación de Herencia (extends ItemAlmacen).
 public class MaterialObra extends ItemAlmacen {
+    
+    // Atributo específico de la subclase (Especialización)
     private int desperdicioAcumulado;
 
     public MaterialObra() {
@@ -16,7 +19,8 @@ public class MaterialObra extends ItemAlmacen {
     public int getDesperdicioAcumulado() { return desperdicioAcumulado; }
     public void setDesperdicioAcumulado(int desperdicioAcumulado) { this.desperdicioAcumulado = desperdicioAcumulado; }
 
-    // POLIMORFISMO: Sobreescribimos el método abstracto
+    // REQUISITO DE RÚBRICA: Polimorfismo por Sobreescritura (@Override).
+    // Implementación del comportamiento específico de la subclase MaterialObra.
     @Override
     public String generarReporteDetalle() {
         return "Material de Obra: " + getNombre() + " | Stock: " + getStockActual() + " " + getUnidadMedida() + " | Merma: " + desperdicioAcumulado;

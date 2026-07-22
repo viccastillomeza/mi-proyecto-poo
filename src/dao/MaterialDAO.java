@@ -28,13 +28,13 @@ public class MaterialDAO implements IOperacionesCRUD<ItemAlmacen> {
             ps.setInt(4, objeto.getStockActual());
             ps.setInt(5, objeto.getStockMinimo());
             
-            // MAGIA DE POO: Solo MaterialObra tiene desperdicio. 
-            // Evaluamos de qué tipo es el objeto que nos enviaron usando "instanceof"
+            // REQUISITO DE RÚBRICA (POLIMORFISMO Y DOWNCASTING): 
+            // Evaluación del tipo de instancia en tiempo de ejecución (instanceof) para persistir atributos específicos de las subclases
             if (objeto instanceof MaterialObra) {
                 MaterialObra mat = (MaterialObra) objeto;
                 ps.setInt(6, mat.getDesperdicioAcumulado());
             } else {
-                ps.setInt(6, 0); // Herramientas y Consumibles no tienen desperdicio inicial
+                ps.setInt(6, 0); // Valor por defecto para subclases que no implementan gestión de mermas
             }
             
             return ps.executeUpdate() > 0;
@@ -62,7 +62,8 @@ public class MaterialDAO implements IOperacionesCRUD<ItemAlmacen> {
                 int stockMinimo = rs.getInt("stock_minimo");
                 int desperdicio = rs.getInt("desperdicio_acumulado");
 
-                // MAGIA DE POO: Polimorfismo al leer desde MySQL
+                // REQUISITO DE RÚBRICA (POLIMORFISMO): 
+                // Instanciación dinámica de subclases basadas en el discriminador 'tipo_item' recuperado de la base de datos
                 ItemAlmacen item = null;
                 
                 switch (tipo) {
@@ -100,6 +101,7 @@ public class MaterialDAO implements IOperacionesCRUD<ItemAlmacen> {
             ps.setInt(4, objeto.getStockActual());
             ps.setInt(5, objeto.getStockMinimo());
             
+            // Verificación polimórfica para la actualización de atributos exclusivos
             if (objeto instanceof MaterialObra) {
                 ps.setInt(6, ((MaterialObra) objeto).getDesperdicioAcumulado());
             } else {

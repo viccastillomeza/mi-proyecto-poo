@@ -8,52 +8,53 @@ import modelo.Usuario;
 import vista.FrmLogin;
 import vista.FrmPrincipal;
 
-// Implementar ActionListener permite que esta clase "escuche" los clics de los botones
+// Implementación de la interfaz genérica ActionListener para interceptar eventos de la vista
 public class ControladorLogin implements ActionListener {
     
     private FrmLogin vista;
     private UsuarioDAO dao;
 
-    // El constructor recibe la ventana y el traductor de la base de datos
+    // Inyección de dependencias: El controlador requiere la Vista y el Objeto de Acceso a Datos (DAO)
     public ControladorLogin(FrmLogin vista, UsuarioDAO dao) {
         this.vista = vista;
         this.dao = dao;
         
-        // Le decimos al botón de la vista que ESTA clase controlará sus clics
+        // Asignación del listener al botón de autenticación
         this.vista.btnIngresar.addActionListener(this);
     }
 
-    // Método para arrancar y configurar la ventana
+    // Inicialización y configuración de las propiedades del JFrame
     public void iniciar() {
         vista.setTitle("Sistema de Almacén - Login");
-        vista.setLocationRelativeTo(null); // Centra la ventana en la pantalla
+        vista.setLocationRelativeTo(null); 
         vista.setResizable(false);
         vista.setVisible(true);
     }
 
-    // Este método se dispara automáticamente cuando alguien hace clic en un botón
+    // Sobreescritura del método accionado por eventos de interfaz
     @Override
     public void actionPerformed(ActionEvent e) {
         
-        // Verificamos si el clic vino exactamente del botón Ingresar
+        // Verificación del origen del evento (Botón Ingresar)
         if (e.getSource() == vista.btnIngresar) {
             
-            // Extraemos el texto de las cajas públicas de la vista
+            // Extracción de credenciales desde los componentes públicos de la vista
             String usuario = vista.txtUsuario.getText();
             String password = new String(vista.txtPassword.getPassword());
 
-            // Validación básica para evitar campos vacíos
+            // Validación de integridad a nivel local (Frontend)
             if (usuario.isEmpty() || password.isEmpty()) {
                 JOptionPane.showMessageDialog(vista, "Por favor, llene todos los campos.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            // Enviamos los datos al DAO para consultar MySQL
+            // Delegación de la validación hacia la capa DAO conectada a MySQL
             Usuario usuarioLogueado = dao.login(usuario, password);
 
-            // Si el DAO devuelve un objeto, el usuario existe y la clave es correcta
+            // Verificación del objeto retornado (Éxito de la consulta)
             if (usuarioLogueado != null) {
-                // Guardamos al usuario en la sesión global <---
+                
+                // Mantenimiento de Estado Global: Almacenamos la identidad del usuario en la sesión del sistema
                 utilidades.Sesion.usuarioLogueado = usuarioLogueado;
                 
                 JOptionPane.showMessageDialog(vista, 
@@ -61,22 +62,20 @@ public class ControladorLogin implements ActionListener {
                         "Acceso Concedido", 
                         JOptionPane.INFORMATION_MESSAGE);
                 
-                // Aquí cerraremos el login y abriremos FrmPrincipal más adelante
-                                
-                // 1. Cerramos la ventana de Login
+                // Transición de flujo de trabajo:
+                // 1. Liberación de recursos de la ventana actual de Login
                 vista.dispose(); 
                 
-                // 2. Instanciamos el menú principal y su controlador
+                // 2. Instanciación de los componentes arquitectónicos de la ventana MDI Principal
                 FrmPrincipal vistaPrincipal = new FrmPrincipal();
                 ControladorPrincipal ctrlPrincipal = new ControladorPrincipal(vistaPrincipal);
                 
-                // 3. Arrancamos el MDI
+                // 3. Ejecución del menú contextual
                 ctrlPrincipal.iniciar();
                 
             } else {
+                // Bloqueo de acceso por credenciales inválidas
                 JOptionPane.showMessageDialog(vista, "Usuario o clave incorrectos", "Error", JOptionPane.ERROR_MESSAGE);
-                 
-
             }
         }
     }

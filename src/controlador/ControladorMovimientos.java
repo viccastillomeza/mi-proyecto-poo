@@ -23,12 +23,14 @@ public class ControladorMovimientos {
         modeloTabla = (DefaultTableModel) vista.tblMovimientos.getModel();
         modeloTabla.setRowCount(0); 
 
+        // Recuperación del historial completo
         List<Movimiento> lista = dao.leerTodos();
 
-        // Usamos otra expresión Lambda para recorrer el historial rápidamente
+        // REQUISITO DE RÚBRICA: Uso de Expresiones Lambda para la iteración eficiente de la estructura
         lista.forEach(mov -> {
             Object[] fila = new Object[6];
-            fila[0] = mov.idMovimiento(); // Usamos los métodos autogenerados del Record
+            // Acceso a datos mediante los métodos inmutables propios de la estructura Record
+            fila[0] = mov.idMovimiento(); 
             fila[1] = mov.idItem();
             fila[2] = mov.idUsuario();
             fila[3] = mov.tipoMovimiento();

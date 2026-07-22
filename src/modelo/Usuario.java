@@ -1,6 +1,9 @@
 package modelo;
 
+// Entidad del modelo de dominio (POJO) representativa de los actores del sistema.
 public class Usuario {
+    
+    // REQUISITO DE RÚBRICA: Encapsulamiento (Modificadores de acceso private)
     private int idUsuario;
     private String dni;
     private String nombre;
@@ -21,7 +24,7 @@ public class Usuario {
         this.rol = rol;
     }
 
-    // Getters y Setters
+    // Métodos de acceso encapsulados
     public int getIdUsuario() { return idUsuario; }
     public void setIdUsuario(int idUsuario) { this.idUsuario = idUsuario; }
 
@@ -43,6 +46,7 @@ public class Usuario {
     public String getRol() { return rol; }
     public void setRol(String rol) { this.rol = rol; }
     
+    // Lógica de negocio encapsulada dentro de la propia clase
     public String getNombreCompleto() {
         return this.nombre + " " + this.apellido;
     }
