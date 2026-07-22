@@ -42,7 +42,7 @@ CREATE TABLE `items_almacen` (
 
 LOCK TABLES `items_almacen` WRITE;
 /*!40000 ALTER TABLE `items_almacen` DISABLE KEYS */;
-INSERT INTO `items_almacen` VALUES (1,'Cemento Sol','MaterialObra','Bolsas',100,30,0),(2,'Ladrillo King Kong 18 huecos','MaterialObra','Millares',15,3,1),(3,'Arena Fina','MaterialObra','Metros Cúbicos',25,5,2),(4,'Arena Gruesa','MaterialObra','Metros Cúbicos',30,8,3),(5,'Piedra Chancada 1/2','MaterialObra','Metros Cúbicos',20,5,1),(6,'Fierro Corrugado 1/2 pulgada','MaterialObra','Varillas',250,50,4),(7,'Fierro Corrugado 3/8 pulgada','MaterialObra','Varillas',300,50,6),(8,'Yeso de Construcción','MaterialObra','Bolsas',60,15,2),(9,'Alambre Negro Nro 8','MaterialObra','Kilos',90,20,0),(10,'Alambre Negro Nro 16','MaterialObra','Kilos',100,20,4),(11,'Taladro Percutor Bosch 750W','Herramienta','Unidades',6,2,0),(12,'Amoladora Angular Makita 4.5\"','Herramienta','Unidades',8,2,0),(13,'Martillo Demoledor Dewalt','Herramienta','Unidades',3,1,0),(14,'Mezcladora de Concreto 9p3','Herramienta','Unidades',2,1,0),(15,'Carretilla Buggy','Herramienta','Unidades',12,4,0),(16,'Huincha de medir 50m','Herramienta','Unidades',5,2,0),(17,'Nivel de Mano de Aluminio 24\"','Herramienta','Unidades',10,3,0),(18,'Pala Cuchara','Herramienta','Unidades',15,5,0),(19,'Pico con Mango de Madera','Herramienta','Unidades',10,3,0),(20,'Winche Eléctrico 500Kg','Herramienta','Unidades',2,1,0),(21,'Clavos para madera 2.5 pulgadas','Consumible','Cajas',40,10,2),(22,'Clavos para madera 3 pulgadas','Consumible','Cajas',35,10,3),(23,'Disco de corte para metal 4.5\"','Consumible','Unidades',100,20,15),(24,'Disco diamantado continuo 4.5\"','Consumible','Unidades',50,10,5),(25,'Guantes de Cuero reforzado','Consumible','Pares',60,15,0),(26,'Lentes de Seguridad transparentes','Consumible','Unidades',80,20,0),(27,'Casco de Seguridad Blanco','Consumible','Unidades',30,5,0),(28,'Mascarilla contra polvo N95','Consumible','Cajas',15,4,1),(29,'Electrodo Celulósico 6011 1/8\"','Consumible','Kilos',50,10,4),(30,'Hoja de Sierra bimetálica','Consumible','Unidades',120,30,10),(31,'Casco de Seguridad','MaterialObra','Unidades',90,10,0),(33,'Casco de Seguridad','MaterialObra','Unidades',90,10,0);
+INSERT INTO `items_almacen` VALUES (1,'Cemento Sol','MaterialObra','Bolsas',100,30,0),(2,'Ladrillo King Kong 18 huecos','MaterialObra','Millares',15,3,1),(3,'Arena Fina','MaterialObra','Metros Cúbicos',25,5,2),(4,'Arena Gruesa','MaterialObra','Metros Cúbicos',30,8,3),(5,'Piedra Chancada 1/2','MaterialObra','Metros Cúbicos',20,5,1),(6,'Fierro Corrugado 1/2 pulgada','MaterialObra','Varillas',250,50,4),(7,'Fierro Corrugado 3/8 pulgada','MaterialObra','Varillas',300,50,6),(8,'Yeso de Construcción','MaterialObra','Bolsas',60,15,2),(9,'Alambre Negro Nro 8','MaterialObra','Kilos',90,20,0),(10,'Alambre Negro Nro 16','MaterialObra','Kilos',80,20,0),(11,'Taladro Percutor Bosch 750W','Herramienta','Unidades',6,2,0),(12,'Amoladora Angular Makita 4.5\"','Herramienta','Unidades',8,2,0),(13,'Martillo Demoledor Dewalt','Herramienta','Unidades',3,1,0),(14,'Mezcladora de Concreto 9p3','Herramienta','Unidades',2,1,0),(15,'Carretilla Buggy','Herramienta','Unidades',12,4,0),(16,'Huincha de medir 50m','Herramienta','Unidades',5,2,0),(17,'Nivel de Mano de Aluminio 24\"','Herramienta','Unidades',10,3,0),(18,'Pala Cuchara','Herramienta','Unidades',15,5,0),(19,'Pico con Mango de Madera','Herramienta','Unidades',10,3,0),(20,'Winche Eléctrico 500Kg','Herramienta','Unidades',2,1,0),(21,'Clavos para madera 2.5 pulgadas','Consumible','Cajas',40,10,2),(22,'Clavos para madera 3 pulgadas','Consumible','Cajas',45,10,0),(23,'Disco de corte para metal 4.5\"','Consumible','Unidades',100,20,15),(24,'Disco diamantado continuo 4.5\"','Consumible','Unidades',50,10,5),(25,'Guantes de Cuero reforzado','Consumible','Pares',60,15,0),(26,'Lentes de Seguridad transparentes','Consumible','Unidades',80,20,0),(27,'Casco de Seguridad Blanco','Consumible','Unidades',30,5,0),(28,'Mascarilla contra polvo N95','Consumible','Cajas',15,4,1),(29,'Electrodo Celulósico 6011 1/8\"','Consumible','Kilos',50,10,4),(30,'Hoja de Sierra bimetálica','Consumible','Unidades',120,30,10),(31,'Casco de Seguridad','MaterialObra','Unidades',90,10,0),(33,'Casco de Seguridad','MaterialObra','Unidades',90,10,0);
 /*!40000 ALTER TABLE `items_almacen` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -65,7 +65,7 @@ CREATE TABLE `movimientos` (
   KEY `id_usuario` (`id_usuario`),
   CONSTRAINT `movimientos_ibfk_1` FOREIGN KEY (`id_item`) REFERENCES `items_almacen` (`id_item`) ON DELETE CASCADE,
   CONSTRAINT `movimientos_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -74,7 +74,7 @@ CREATE TABLE `movimientos` (
 
 LOCK TABLES `movimientos` WRITE;
 /*!40000 ALTER TABLE `movimientos` DISABLE KEYS */;
-INSERT INTO `movimientos` VALUES (1,1,1,'INGRESO',50,'2026-06-25 10:43:38'),(2,2,3,'SALIDA',2,'2026-06-25 11:15:00'),(3,3,4,'INGRESO',10,'2026-06-26 08:30:00'),(4,1,4,'SALIDA',15,'2026-06-26 14:20:00'),(5,4,1,'INGRESO',20,'2026-06-27 09:00:00'),(6,5,3,'SALIDA',5,'2026-06-27 15:45:00'),(7,6,1,'INGRESO',100,'2026-06-28 10:10:00'),(8,2,4,'SALIDA',3,'2026-06-28 16:00:00');
+INSERT INTO `movimientos` VALUES (1,1,1,'INGRESO',50,'2026-06-25 10:43:38'),(2,2,3,'SALIDA',2,'2026-06-25 11:15:00'),(3,3,4,'INGRESO',10,'2026-06-26 08:30:00'),(4,1,4,'SALIDA',15,'2026-06-26 14:20:00'),(5,4,1,'INGRESO',20,'2026-06-27 09:00:00'),(6,5,3,'SALIDA',5,'2026-06-27 15:45:00'),(7,6,1,'INGRESO',100,'2026-06-28 10:10:00'),(8,2,4,'SALIDA',3,'2026-06-28 16:00:00'),(9,10,1,'SALIDA',20,'2026-07-22 00:02:50'),(10,22,1,'INGRESO',10,'2026-07-22 00:03:30');
 /*!40000 ALTER TABLE `movimientos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -118,4 +118,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-21  5:52:35
+-- Dump completed on 2026-07-22  0:41:06
